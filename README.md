@@ -34,7 +34,7 @@ Response interception support in Puppeteer and Playwright is missing. There may 
 ### What We Want
 ![download](https://user-images.githubusercontent.com/1064036/89196952-95881b80-d570-11ea-8f8c-67fda573c768.png)
 <br />
-Make Chromium download the files. This can be done by adding `content-disposition: attachment` header to the response.
+Make Chromium download the files. This can be done by adding a `content-disposition: attachment` header to the response.
 
 ### Test Site
 
