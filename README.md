@@ -11,7 +11,7 @@ What these examples do:
 <br /><br />
 **A visual overview**
 <p align="center">
- <img src="https://user-images.githubusercontent.com/1064036/89191700-ebf15c00-d568-11ea-96dc-5dd76c80eec2.png" width="720" alt="cdp-modify-response-header" />
+ <img src="https://user-images.githubusercontent.com/1064036/89210995-b5c2d500-d586-11ea-8bca-4b27231471c4.png" alt="cdp-modify-response-header" />
 </p>
 
 ## But why?
