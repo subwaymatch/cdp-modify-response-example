@@ -41,7 +41,9 @@ Make Chromium download the files. This can be done by adding a `content-disposit
 I've setup a test site with links to both a PDF file and a XML file.<br />
 [https://pdf-xml-download-test.vercel.app/](https://pdf-xml-download-test.vercel.app/)
 
-![pdf-xml-download-site](https://user-images.githubusercontent.com/1064036/89196464-ddf30980-d56f-11ea-95e2-3f6577719924.png)
+<p align="center">
+<img src="https://user-images.githubusercontent.com/1064036/89196464-ddf30980-d56f-11ea-95e2-3f6577719924.png" width="600" alt="pdf-xml-download-site" />
+</p>
 
 
 ## Usage
