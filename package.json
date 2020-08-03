@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node puppeteer-example.js"
   },
   "license": "MIT",
   "dependencies": {
