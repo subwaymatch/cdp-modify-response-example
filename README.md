@@ -73,6 +73,7 @@ $ node playwright-example.js
 - Codes for [Puppeteer](https://pptr.dev) and [Playwright](https://playwright.dev) are almost identical. They have subtle differences in creating a new CDP session, but all other code are pretty much the same.
 - Chromium is the only browser that will work with this example. Using Firefox or Webkit browsers will throw errors since they don't support CDP.
 - You can specify more specific patterns when enabling `requestPaused` events with `Fetch.enable`. For simplicity's sake, this example captures all requests at `Response` stage.
+- There may be cases where the response already has a `content-disposition` header. This example does not handle those cases. An easy way to handle those cases would be to simply replace the existing `content-disposition: yariyada` header with our new `content-disposition: attachment` header.
 
 
 ### What does the intercepted object look like in `Fetch.requestPaused`?
