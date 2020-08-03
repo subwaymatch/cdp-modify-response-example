@@ -1,0 +1,16 @@
+{
+  "name": "cdp-test",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "atob": "^2.1.2",
+    "btoa": "^1.2.1",
+    "chrome-launcher": "^0.13.4",
+    "chrome-remote-interface": "^0.28.2",
+    "puppeteer": "^5.2.1"
+  }
+}
