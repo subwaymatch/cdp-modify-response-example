@@ -3,6 +3,7 @@ const puppeteer = require('puppeteer');
 (async () => {
   const browser = await puppeteer.launch({
     headless: false,
+    defaultViewport: null, // full viewport size
   });
 
   const page = await browser.newPage();
@@ -32,8 +33,6 @@ const puppeteer = require('puppeteer');
     Issued when the domain is enabled and the request URL matches the specified filter. The request is paused until the client responds with one of continueRequest, failRequest or fulfillRequest. The stage of the request can be determined by presence of responseErrorReason and responseStatusCode -- the request is at the response stage if either of these fields is present and in the request stage otherwise.
   */
   await client.on('Fetch.requestPaused', async (reqEvent) => {
-    console.log('Fetch.requestPaused');
-
     // Retrieve EventID
     const { requestId } = reqEvent;
 
@@ -76,7 +75,7 @@ const puppeteer = require('puppeteer');
       await client.send('Fetch.fulfillRequest', {
         requestId,
         responseCode: 200,
-        responseHeaders: responseHeaders,
+        responseHeaders,
         body: responseCdp.body,
       });
     } else {
