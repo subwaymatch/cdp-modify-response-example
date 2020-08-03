@@ -16,7 +16,7 @@ What these examples do:
 
 ## But why?
 
-Response interception support in Puppeteer and Playwright is missing. There may be multiple scenarios where you need to modify either the response body or response headers for crawling or testing. As an example, you may want Chromium to download PDF and XML content-type responses instead of opening them in the built-in viewers.
+Response interception support in Puppeteer and Playwright is missing. There may be multiple scenarios where you need to modify either the response body or response headers for crawling or testing. As an example, you may want Chromium to download PDF and XML content-type responses instead of opening them in the built-in viewers in headful mode (in headless mode, the default behavior is to download the PDF file).
 
 ### Default Behaviors
 <p align="center">
