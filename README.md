@@ -2,7 +2,7 @@
 
 What these examples do:
 
-1. :wrench: Creates a new Chrome-Devtools-Protocol (CDP) session using [Puppeteer](https://pptr.dev) or [Playwright](https://playwright.dev).
+1. :wrench: Creates a new Chrome-Devtools-Protocol (CDP) session in [Puppeteer](https://pptr.dev) or [Playwright](https://playwright.dev).
 2. :hammer: Enable `Fetch` domain to let us substitute browser's network layer with our own code.
 3. :eyes: Pause every request and check `content-type` header to match `pdf` and `xml` types.
 4. :fast_forward: If the `content-type` is not what we are looking for, resume the request without any change.
@@ -13,6 +13,36 @@ What these examples do:
 <p align="center">
  <img src="https://user-images.githubusercontent.com/1064036/89191700-ebf15c00-d568-11ea-96dc-5dd76c80eec2.png" width="720" alt="cdp-modify-response-header" />
 </p>
+
+## But why?
+
+Response interception support in Puppeteer and Playwright is missing. There may be multiple scenarios where you need to modify either the response body or response headers for crawling or testing. As an example, you may want Chromium to download PDF and XML content-type responses instead of opening them in the built-in viewers.
+
+### Default Behaviors
+<p align="center">
+ <img src="https://user-images.githubusercontent.com/1064036/89196451-d7649200-d56f-11ea-9dca-3a22d7d9ff50.png" width="600" alt="chromium-pdf-viewer" />
+ <br />
+ PDF response (content-type: application/pdf) is opened in Chromium
+</p>
+<br /><br />
+<p align="center">
+ <img src="https://user-images.githubusercontent.com/1064036/89196461-db90af80-d56f-11ea-8640-44d4fff46574.png" width="600" alt="chromium-xml-viewer" />
+ <br />
+ XML response (content-type: text/xml) is also rendered in Chromium
+</p>
+
+### What We Want
+![download](https://user-images.githubusercontent.com/1064036/89196952-95881b80-d570-11ea-8f8c-67fda573c768.png)
+<br />
+Make Chromium download the files. This can be done by adding `content-disposition: attachment` header to the response.
+
+### Test Site
+
+I've setup a test site with links to both a PDF file and a XML file.<br />
+[https://pdf-xml-download-test.vercel.app/](https://pdf-xml-download-test.vercel.app/)
+
+![pdf-xml-download-site](https://user-images.githubusercontent.com/1064036/89196464-ddf30980-d56f-11ea-95e2-3f6577719924.png)
+
 
 ## Usage
 
@@ -41,6 +71,7 @@ $ node playwright-example.js
 - Codes for [Puppeteer](https://pptr.dev) or [Playwright](https://playwright.dev) are almost identical. They have subtle differences in creating a new CDP session, but all other code are pretty much the same.
 - Chromium is the only browser that will work with this example. Using Firefox or Webkit browsers will throw errors.
 - You can specify more specific patterns when enabling `requestPaused` events with `Fetch.enable`. For simplicity's sake, this example captures all requests at `Response` stage.
+- For demo purposes, 
 
 
 ### What does the intercepted object look like in `Fetch.requestPaused`?
