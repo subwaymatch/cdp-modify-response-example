@@ -1,12 +1,17 @@
-# Modifying Responses in Puppeteer & Playwright
+# Modifying Response Headers in Puppeteer & Playwright
 
-What this example does:
+What these examples do:
 
 1. :wrench: Creates a new Chrome-Devtools-Protocol (CDP) session using [Puppeteer](https://pptr.dev) or [Playwright](https://playwright.dev).
 2. :hammer: Enable `Fetch` domain to let us substitute browser's network layer with our own code.
 3. :eyes: Pause every request and check `content-type` header to match `pdf` and `xml` types.
-4. :fast_forward: If the `content-type` is not what we are looking for, continue the request without modifying the response object.
+4. :fast_forward: If the `content-type` is not what we are looking for, resume the request without any change.
 5. :dart: If the `content-type` is what we're looking for (`pdf` or `xml`), add a `content-disposition: attachment` response header to make the browser download the file instead of opening it in Chromium's built-in viewers.
+
+**A visual overview**
+
+<img src="https://user-images.githubusercontent.com/1064036/89190675-66b97780-d567-11ea-89eb-58e2d94350d3.png" width="720" alt="cdp-modify-response-header" />
+
 
 ## Usage
 
@@ -35,7 +40,6 @@ $ node playwright-example.js
 - Codes for [Puppeteer](https://pptr.dev) or [Playwright](https://playwright.dev) are almost identical. They have subtle differences in creating a new CDP session, but all other code are pretty much the same.
 - Chromium is the only browser that will work with this example. Using Firefox or Webkit browsers will throw errors.
 - You can specify more specific patterns when enabling `requestPaused` events with `Fetch.enable`. For simplicity's sake, this example captures all responses at `Response` stage.
-
 
 
 ### What does the intercepted object look like in `Fetch.requestPaused`?
