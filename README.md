@@ -8,10 +8,11 @@ What these examples do:
 4. :fast_forward: If the `content-type` is not what we are looking for, resume the request without any change.
 5. :dart: If the `content-type` is what we're looking for (`pdf` or `xml`), add a `content-disposition: attachment` response header to make the browser download the file instead of opening it in Chromium's built-in viewers.
 
+<br /><br />
 **A visual overview**
-
-<img src="https://user-images.githubusercontent.com/1064036/89190675-66b97780-d567-11ea-89eb-58e2d94350d3.png" width="720" alt="cdp-modify-response-header" />
-
+<p align="center">
+ <img src="https://user-images.githubusercontent.com/1064036/89190675-66b97780-d567-11ea-89eb-58e2d94350d3.png" width="720" alt="cdp-modify-response-header" />
+</p>
 
 ## Usage
 
@@ -39,7 +40,7 @@ $ node playwright-example.js
 
 - Codes for [Puppeteer](https://pptr.dev) or [Playwright](https://playwright.dev) are almost identical. They have subtle differences in creating a new CDP session, but all other code are pretty much the same.
 - Chromium is the only browser that will work with this example. Using Firefox or Webkit browsers will throw errors.
-- You can specify more specific patterns when enabling `requestPaused` events with `Fetch.enable`. For simplicity's sake, this example captures all responses at `Response` stage.
+- You can specify more specific patterns when enabling `requestPaused` events with `Fetch.enable`. For simplicity's sake, this example captures all requests at `Response` stage.
 
 
 ### What does the intercepted object look like in `Fetch.requestPaused`?
