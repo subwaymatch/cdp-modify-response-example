@@ -48,7 +48,7 @@ I've setup a test site with links to both a PDF file and a XML file.<br />
 
 ## Usage
 
-### Installing Dependencies
+### Install Dependencies
 Using `npm`
 ```
 $ npm install
