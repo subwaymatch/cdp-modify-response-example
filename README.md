@@ -1,4 +1,4 @@
-# Modifying Response Header to Force File Downloads in Puppeteer & Playwright
+# Modifying Response Headers to Force File Downloads in Puppeteer & Playwright
 
 What these examples do:
 
