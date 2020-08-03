@@ -1,15 +1,18 @@
-const puppeteer = require('puppeteer');
+const { chromium } = require('playwright');
 
 (async () => {
-  const browser = await puppeteer.launch({
+  const browser = await chromium.launch({
     headless: false,
-    defaultViewport: null, // full viewport size
   });
 
-  const page = await browser.newPage();
+  const browserContext = await browser.newContext({
+    acceptDownloads: true,
+  });
+
+  const page = await browserContext.newPage();
 
   // Create a new Chrome Devtools Protocol Session
-  const client = await page.target().createCDPSession();
+  const client = await browserContext.newCDPSession(page);
 
   /*
     Fetch.enable
@@ -86,7 +89,7 @@ const puppeteer = require('puppeteer');
 
   await page.goto('https://pdf-xml-download-test.vercel.app/');
 
-  await page.waitFor(100000);
+  await page.waitForTimeout(100000);
 
   /*
     Fetch.disable
