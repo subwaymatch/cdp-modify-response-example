@@ -51,10 +51,18 @@ const puppeteer = require('puppeteer');
       // console.log(reqEvent.responseHeaders);
 
       // Adding 'content-disposition: attachment' header will tell the browser to download the file instead of opening it in using built-in viewer
-      responseHeaders.push({
-        name: 'content-disposition',
-        value: 'attachment',
-      });
+      const foundHeaderIndex = responseHeaders.findIndex(
+        (h) => h.name === "content-disposition"
+      );
+      const attachmentHeader = {
+        name: "content-disposition",
+        value: "attachment",
+      };
+      if (foundHeaderIndex) {
+        responseHeaders[foundHeaderIndex] = attachmentHeader;
+      } else {
+        responseHeaders.push(attachmentHeader);
+      }
 
       /*
         Fetch.getResponseBody
