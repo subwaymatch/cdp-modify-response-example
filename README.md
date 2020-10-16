@@ -1,6 +1,8 @@
 # Modifying Response Headers to Force File Downloads in Puppeteer & Playwright
 
-What these examples do:
+This repo contains examples of intercepting responses in both Puppeteer & Playwright.
+
+## What these examples do:
 
 1. :wrench: Creates a new Chrome-Devtools-Protocol (CDP) session in [Puppeteer](https://pptr.dev) or [Playwright](https://playwright.dev).
 2. :hammer: Enable `Fetch` domain to let us substitute browser's network layer with our own code.
