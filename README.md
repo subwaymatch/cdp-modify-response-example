@@ -1,6 +1,6 @@
 # Modifying Response Headers to Force File Downloads in Puppeteer & Playwright
 
-This repo contains examples of intercepting responses in both Puppeteer & Playwright.
+This repo contains examples of intercepting HTTP responses in both Puppeteer & Playwright.
 
 ## What these examples do:
 
