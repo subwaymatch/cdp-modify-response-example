@@ -1,108 +1,99 @@
-const puppeteer = require('puppeteer');
+import path from 'node:path';
+import puppeteer from 'puppeteer';
 
-(async () => {
-  const browser = await puppeteer.launch({
-    headless: false,
-    defaultViewport: null, // full viewport size
-  });
+// Content types that Chromium would otherwise open in its built-in PDF and XML viewers
+const DOWNLOAD_CONTENT_TYPES = new Set(['application/pdf', 'application/xml', 'text/xml']);
 
-  const page = await browser.newPage();
+// Returns the 'content-type' header without parameters, e.g. 'text/xml; charset=utf-8' -> 'text/xml'
+function getContentType(headers) {
+  const header = headers.find((h) => h.name.toLowerCase() === 'content-type');
+  return (header?.value ?? '').split(';')[0].trim().toLowerCase();
+}
 
-  // Create a new Chrome Devtools Protocol Session
-  const client = await page.target().createCDPSession();
+const browser = await puppeteer.launch({
+  headless: false,
+  defaultViewport: null, // full viewport size
+  downloadBehavior: {
+    policy: 'allow',
+    downloadPath: path.resolve('downloads'),
+  },
+});
 
-  /*
-    Fetch.enable
-    https://chromedevtools.github.io/devtools-protocol/tot/Fetch/#method-enable
+// Use the tab that opens with the browser
+const [page] = await browser.pages();
 
-    Enables issuing of requestPaused events. A request will be paused until client calls one of failRequest, fulfillRequest or continueRequest/continueWithAuth.
-  */
-  await client.send('Fetch.enable', {
-    patterns: [
-      {
-        urlPattern: '*',
-        requestStage: 'Response',
-      },
-    ],
-  });
+// Create a new Chrome DevTools Protocol session
+const client = await page.createCDPSession();
 
-  /*
-    Fetch.requestPaused
-    https://chromedevtools.github.io/devtools-protocol/tot/Fetch/#event-requestPaused
-    
-    Issued when the domain is enabled and the request URL matches the specified filter. The request is paused until the client responds with one of continueRequest, failRequest or fulfillRequest. The stage of the request can be determined by presence of responseErrorReason and responseStatusCode -- the request is at the response stage if either of these fields is present and in the request stage otherwise.
-  */
-  await client.on('Fetch.requestPaused', async (reqEvent) => {
-    // Retrieve EventID
-    const { requestId } = reqEvent;
+/*
+  Fetch.enable
+  https://chromedevtools.github.io/devtools-protocol/tot/Fetch/#method-enable
 
-    let responseHeaders = reqEvent.responseHeaders || [];
-    let contentType = '';
+  Enables issuing of requestPaused events. A request will be paused until client calls one of failRequest, fulfillRequest or continueRequest/continueWithAuth.
+*/
+await client.send('Fetch.enable', {
+  patterns: [
+    {
+      urlPattern: '*',
+      // Only pause pages and frames, not images, scripts, stylesheets, etc.
+      resourceType: 'Document',
+      requestStage: 'Response',
+    },
+  ],
+});
 
-    // Find and store 'content-type' header
-    for (let elements of responseHeaders) {
-      if (elements.name.toLowerCase() === 'content-type') {
-        contentType = elements.value;
-      }
-    }
+/*
+  Fetch.requestPaused
+  https://chromedevtools.github.io/devtools-protocol/tot/Fetch/#event-requestPaused
 
-    if (contentType.endsWith('pdf') || contentType.endsWith('xml')) {
-      // Uncomment the line below to log response headers for debugging
-      // console.log(reqEvent.responseHeaders);
+  Issued when the domain is enabled and the request URL matches the specified filter. The request is paused until the client responds with one of continueRequest, failRequest or fulfillRequest. The stage of the request can be determined by presence of responseErrorReason and responseStatusCode -- the request is at the response stage if either of these fields is present and in the request stage otherwise.
+*/
+client.on('Fetch.requestPaused', async (reqEvent) => {
+  const { requestId, request, responseStatusCode, responseHeaders = [] } = reqEvent;
 
-      // Adding 'content-disposition: attachment' header will tell the browser to download the file instead of opening it in using built-in viewer
-      const foundHeaderIndex = responseHeaders.findIndex(
-        (h) => h.name === "content-disposition"
-      );
-      const attachmentHeader = {
-        name: "content-disposition",
-        value: "attachment",
-      };
-      if (foundHeaderIndex) {
-        responseHeaders[foundHeaderIndex] = attachmentHeader;
-      } else {
-        responseHeaders.push(attachmentHeader);
-      }
-
-      /*
-        Fetch.getResponseBody
-        https://chromedevtools.github.io/devtools-protocol/tot/Fetch/#method-getResponseBody
-
-        Causes the body of the response to be received from the server and returned as a single string. May only be issued for a request that is paused in the Response stage and is mutually exclusive with takeResponseBodyForInterceptionAsStream. Calling other methods that affect the request or disabling fetch domain before body is received results in an undefined behavior.
-      */
-      const responseObj = await client.send('Fetch.getResponseBody', {
-        requestId,
-      });
-
-      /*
-        Fetch.fulfillRequest
-        https://chromedevtools.github.io/devtools-protocol/tot/Fetch/#method-fulfillRequest
-
-        Provides response to the request.
-      */
-      await client.send('Fetch.fulfillRequest', {
-        requestId,
-        responseCode: 200,
-        responseHeaders,
-        body: responseObj.body,
-      });
-    } else {
+  try {
+    if (!DOWNLOAD_CONTENT_TYPES.has(getContentType(responseHeaders))) {
       // If the content-type is not what we're looking for, continue the request without modifying the response
       await client.send('Fetch.continueRequest', { requestId });
+      return;
     }
-  });
 
-  await page.goto('https://pdf-xml-download-test.vercel.app/');
+    // Adding 'content-disposition: attachment' header will tell the browser to download the file instead of opening it in a built-in viewer
+    // Any existing 'content-disposition' header (e.g. 'inline') is replaced
+    const headers = responseHeaders.filter((h) => h.name.toLowerCase() !== 'content-disposition');
+    headers.push({ name: 'content-disposition', value: 'attachment' });
 
-  await page.waitFor(100000);
+    /*
+      Fetch.getResponseBody
+      https://chromedevtools.github.io/devtools-protocol/tot/Fetch/#method-getResponseBody
 
-  /*
-    Fetch.disable
-    https://chromedevtools.github.io/devtools-protocol/tot/Fetch/#method-disable
+      Causes the body of the response to be received from the server and returned as a single string. May only be issued for a request that is paused in the Response stage and is mutually exclusive with takeResponseBodyForInterceptionAsStream. Calling other methods that affect the request or disabling fetch domain before body is received results in an undefined behavior.
+    */
+    const { body, base64Encoded } = await client.send('Fetch.getResponseBody', { requestId });
 
-    Disables the fetch domain.
-  */
-  await client.send('Fetch.disable');
+    /*
+      Fetch.fulfillRequest
+      https://chromedevtools.github.io/devtools-protocol/tot/Fetch/#method-fulfillRequest
 
-  await browser.close();
-})();
+      Provides response to the request.
+    */
+    await client.send('Fetch.fulfillRequest', {
+      requestId,
+      responseCode: responseStatusCode,
+      responseHeaders: headers,
+      // fulfillRequest expects a base64-encoded body, and getResponseBody reports whether it already is
+      body: base64Encoded ? body : Buffer.from(body).toString('base64'),
+    });
+
+    console.log(`Forced download: ${request.url}`);
+  } catch (error) {
+    console.error(`Failed to handle ${request.url}: ${error.message}`);
+  }
+});
+
+await page.goto('https://pdf-xml-download-test.vercel.app/');
+
+console.log('Click the PDF and XML links to download them to ./downloads. Close the browser to exit.');
+
+// Keep the script running until the browser is closed
+await new Promise((resolve) => browser.once('disconnected', resolve));
